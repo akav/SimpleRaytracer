@@ -8,16 +8,16 @@ namespace SimpleRaytracer
         public int ResolutionY { get; set; }
         public int Samples { get; set; }
         public int Bounces { get; set; }
-        public Vector3 BottomLeft { get; }
+        public Vec3 BottomLeft { get; }
         public float PlaneWidth { get; }
         public float PlaneHeight { get; }
-        public Vector3 CameraPosition { get; }
-        public Vector3 CameraRight { get; }
-        public Vector3 CameraUp { get; }
-        public Vector3 CameraForward { get; }
-        public Vector3 Ambient { get; }
+        public Vec3 CameraPosition { get; }
+        public Vec3 CameraRight { get; }
+        public Vec3 CameraUp { get; }
+        public Vec3 CameraForward { get; }
+        public Vec3 Ambient { get; }
         public GpuBool SimplifiedEnabled { get; }
-        public Vector3 SunDir { get; set; } = Vector3.One;
+        public Vec3 SunDir { get; set; } = Vec3.One;
         public int CurrentSampleCount { get; set; }
 
         public RenderParams(int resolutionX, int resolutionY, int samples, int bounces, Scene scene, GpuBool simplifiedEnabled, int currentSampleCount)

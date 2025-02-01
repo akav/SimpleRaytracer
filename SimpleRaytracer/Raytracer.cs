@@ -19,9 +19,9 @@ namespace SimpleRaytracer
 
         private Context _context;
         private Accelerator _accelerator;
-        private Action<Index1D, ArrayView1D<ColorDataBgr, Stride1D.Dense>, ArrayView1D<Vector3, Stride1D.Dense>, ArrayView1D<GpuSphere, Stride1D.Dense>, ArrayView1D<Mesh, Stride1D.Dense>, ArrayView1D<Triangle, Stride1D.Dense>, RenderParams, ulong> _loadedKernel;
+        private Action<Index1D, ArrayView1D<ColorDataBgr, Stride1D.Dense>, ArrayView1D<Vec3, Stride1D.Dense>, ArrayView1D<GpuSphere, Stride1D.Dense>, ArrayView1D<Mesh, Stride1D.Dense>, ArrayView1D<Triangle, Stride1D.Dense>, RenderParams, ulong> _loadedKernel;
         private MemoryBuffer1D<ColorDataBgr, Stride1D.Dense>? _frameBuffer;
-        private MemoryBuffer1D<Vector3, Stride1D.Dense>? _accumulationBuffer;
+        private MemoryBuffer1D<Vec3, Stride1D.Dense>? _accumulationBuffer;
         private Scene _scene;
         private MemoryBuffer1D<GpuSphere, Stride1D.Dense>? _sceneSphereBuffer;
         private MemoryBuffer1D<Mesh, Stride1D.Dense> _sceneMeshBuffer;
@@ -47,10 +47,10 @@ namespace SimpleRaytracer
 
             // Allocate frame buffer
             _frameBuffer = _accelerator.Allocate1D<ColorDataBgr>(Resolution.Width * Resolution.Height);
-            _accumulationBuffer = _accelerator.Allocate1D<Vector3>(Resolution.Width * Resolution.Height);
+            _accumulationBuffer = _accelerator.Allocate1D<Vec3>(Resolution.Width * Resolution.Height);
 
             // load / precompile the kernel
-            _loadedKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<ColorDataBgr, Stride1D.Dense>, ArrayView1D<Vector3, Stride1D.Dense>, ArrayView1D<GpuSphere, Stride1D.Dense>, ArrayView1D<Mesh, Stride1D.Dense>, ArrayView1D<Triangle, Stride1D.Dense>, RenderParams, ulong>(Kernel);
+            _loadedKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<ColorDataBgr, Stride1D.Dense>, ArrayView1D<Vec3, Stride1D.Dense>, ArrayView1D<GpuSphere, Stride1D.Dense>, ArrayView1D<Mesh, Stride1D.Dense>, ArrayView1D<Triangle, Stride1D.Dense>, RenderParams, ulong>(Kernel);
         }
 
         public void Reset()
@@ -78,7 +78,7 @@ namespace SimpleRaytracer
             _sceneTriangleBuffer.CopyFromCPU(scene.Triangles);
         }
 
-        public void Render(Vector3 sunDir, bool simplifiedEnabled, int sampleCount = 100, int bounceCount = 5)
+        public void Render(Vec3 sunDir, bool simplifiedEnabled, int sampleCount = 100, int bounceCount = 5)
         {
             count += sampleCount;
 
@@ -140,7 +140,7 @@ namespace SimpleRaytracer
             //_sceneSphereBuffer?.Dispose();
         }
 
-        public static void Kernel(Index1D index, ArrayView1D<ColorDataBgr, Stride1D.Dense> output, ArrayView1D<Vector3, Stride1D.Dense> accumulator, ArrayView1D<GpuSphere, Stride1D.Dense> objects, ArrayView1D<Mesh, Stride1D.Dense> meshes, ArrayView1D<Triangle, Stride1D.Dense> triangles, RenderParams renderParams, ulong rngSeed)
+        public static void Kernel(Index1D index, ArrayView1D<ColorDataBgr, Stride1D.Dense> output, ArrayView1D<Vec3, Stride1D.Dense> accumulator, ArrayView1D<GpuSphere, Stride1D.Dense> objects, ArrayView1D<Mesh, Stride1D.Dense> meshes, ArrayView1D<Triangle, Stride1D.Dense> triangles, RenderParams renderParams, ulong rngSeed)
         {
             // Get pixel position
             var x = index % renderParams.ResolutionX;
@@ -154,12 +154,12 @@ namespace SimpleRaytracer
             var rngInit = new XorShift64Star((ulong)index + rngSeed);
             var rng = new XorShift128(rngInit.NextUInt(), rngInit.NextUInt(), rngInit.NextUInt(), rngInit.NextUInt());
 
-            var pixelColor = Vector3.Zero;
+            var pixelColor = Vec3.Zero;
 
             // Run raytracing algorithm n-times for every pixel
             for (int i = 0; i < renderParams.Samples; i++)
             {
-                var offsetVec = Vector2.Zero;
+                var offsetVec = Vec2.Zero;
 
                 // Add small ray origin offset
                 if (!renderParams.SimplifiedEnabled)
@@ -168,7 +168,7 @@ namespace SimpleRaytracer
                 }
 
                 // Calculate ray with origin at camera position
-                var local = renderParams.BottomLeft + new Vector3(
+                var local = renderParams.BottomLeft + new Vec3(
                     renderParams.PlaneWidth * normalizedX + offsetVec.X,
                     renderParams.PlaneHeight * (1 - normalizedY) + offsetVec.Y,
                     0
@@ -179,7 +179,7 @@ namespace SimpleRaytracer
                     renderParams.CameraUp * local.Y +
                     renderParams.CameraForward * local.Z;
 
-                var dir = Vector3.Normalize(rayTargetPos - renderParams.CameraPosition);
+                var dir = Vec3.Normalize(rayTargetPos - renderParams.CameraPosition);
                 var cameraRay = new Ray(renderParams.CameraPosition, dir);
 
                 // Accumulate received light for a given pixel
@@ -240,10 +240,10 @@ namespace SimpleRaytracer
             return didHit;
         }
 
-        private static Vector3 TraceBounces(Ray ray, ArrayView1D<GpuSphere, Stride1D.Dense> objects, ArrayView1D<Mesh, Stride1D.Dense> meshes, ArrayView1D<Triangle, Stride1D.Dense> triangles, int bounces, ref XorShift128 random, RenderParams renderParams)
+        private static Vec3 TraceBounces(Ray ray, ArrayView1D<GpuSphere, Stride1D.Dense> objects, ArrayView1D<Mesh, Stride1D.Dense> meshes, ArrayView1D<Triangle, Stride1D.Dense> triangles, int bounces, ref XorShift128 random, RenderParams renderParams)
         {
-            var rayColor = Vector3.One;
-            var lightColor = Vector3.Zero;
+            var rayColor = Vec3.One;
+            var lightColor = Vec3.Zero;
 
             for (int i = 0; i <= bounces; i++)
             {
@@ -253,10 +253,10 @@ namespace SimpleRaytracer
                     break;
                 }
 
-                var diffuseDir = Vector3.Normalize(hit.normal + GetRandomVector3InUnitSphere(ref random));
-                var specularVecDir = Vector3.Reflect(ray.Direction, hit.normal);
+                var diffuseDir = Vec3.Normalize(hit.normal + GetRandomVec3InUnitSphere(ref random));
+                var specularVecDir = Vec3.Reflect(ray.Direction, hit.normal);
 
-                var reflectionDir = Vector3.Lerp(diffuseDir, specularVecDir, hit.material.Smoothness);
+                var reflectionDir = Vec3.Lerp(diffuseDir, specularVecDir, hit.material.Smoothness);
 
                 ray = new Ray(hit.position, reflectionDir);
 
@@ -267,17 +267,17 @@ namespace SimpleRaytracer
             return lightColor;
         }
 
-        private static Vector3 TraceSimplified(Ray ray, ArrayView1D<GpuSphere, Stride1D.Dense> objects, ArrayView1D<Mesh, Stride1D.Dense> meshes, ArrayView1D<Triangle, Stride1D.Dense> triangles, int bounces, ref XorShift128 random, RenderParams renderParams)
+        private static Vec3 TraceSimplified(Ray ray, ArrayView1D<GpuSphere, Stride1D.Dense> objects, ArrayView1D<Mesh, Stride1D.Dense> meshes, ArrayView1D<Triangle, Stride1D.Dense> triangles, int bounces, ref XorShift128 random, RenderParams renderParams)
         {
             if (TryGetClosestHit(objects, meshes, triangles, ray, out var hit))
             {
-                return Clamp(hit.material.Albedo * Vector3.Dot(hit.normal, renderParams.SunDir) + hit.material.Emission);
+                return Clamp(hit.material.Albedo * Vec3.Dot(hit.normal, renderParams.SunDir) + hit.material.Emission);
             }
 
             return renderParams.Ambient;
         }
 
-        private static Vector3 Clamp(Vector3 value)
+        private static Vec3 Clamp(Vec3 value)
         {
             value.X = XMath.Clamp(value.X, 0, 1);
             value.Y = XMath.Clamp(value.Y, 0, 1);
@@ -291,7 +291,7 @@ namespace SimpleRaytracer
             return random.NextFloat() * 2 - 1f;
         }
 
-        private static Vector3 GetRandomVector3(ref XorShift128 random)
+        private static Vec3 GetRandomVec3(ref XorShift128 random)
         {
             return new(
                 GetRandomFloatNormalized(ref random),
@@ -300,7 +300,7 @@ namespace SimpleRaytracer
             );
         }
 
-        public static Vector3 GetRandomVector3InUnitSphere(ref XorShift128 random)
+        public static Vec3 GetRandomVec3InUnitSphere(ref XorShift128 random)
         {
             var u = random.NextFloat() * 2 - 1;
             var theta = random.NextFloat() * 2 * XMath.PI;
@@ -308,17 +308,17 @@ namespace SimpleRaytracer
             var x = r * XMath.Cos(theta);
             var y = r * XMath.Sin(theta);
 
-            return new Vector3(x, y, u);
+            return new Vec3(x, y, u);
         }
 
-        public static Vector2 GetRandomVector2InUnitSphere(ref XorShift128 random)
+        public static Vec2 GetRandomVector2InUnitSphere(ref XorShift128 random)
         {
             var u = random.NextFloat() * 2 - 1;
             var theta = random.NextFloat() * 2 * XMath.PI;
             var r = XMath.Sqrt(1 - u * u);
             var x = r * XMath.Cos(theta);
 
-            return new Vector2(x, u);
+            return new Vec2(x, u);
         }
 
         public void Dispose()

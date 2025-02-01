@@ -5,10 +5,10 @@ namespace SimpleRaytracer
 {
     public struct Aabb
     {
-        public Vector3 Min { get; set; }
-        public Vector3 Max { get; set; }
+        public Vec3 Min { get; set; }
+        public Vec3 Max { get; set; }
 
-        public Aabb(Vector3 min, Vector3 max)
+        public Aabb(Vec3 min, Vec3 max)
         {
             Min = min;
             Max = max;
@@ -16,7 +16,7 @@ namespace SimpleRaytracer
 
         public bool TestAabb(Ray ray, out float dist)
         {
-            Vector3 dirfrac = Vector3.One / ray.Direction;
+            Vec3 dirfrac = Vec3.One / ray.Direction;
 
             float t1 = (Min.X - ray.Origin.X) * dirfrac.X;
             float t2 = (Max.X - ray.Origin.X) * dirfrac.X;

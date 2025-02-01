@@ -12,12 +12,12 @@ namespace SimpleRaytracer
         {
         }
 
-        public Sphere(Vector3 position, float radius) : base(position)
+        public Sphere(Vec3 position, float radius) : base(position)
         {
             Radius = radius;
         }
 
-        public Sphere(Vector3 position, Quaternion rotation, float radius) : base(position, rotation)
+        public Sphere(Vec3 position, Quaternion rotation, float radius) : base(position, rotation)
         {
             Radius = radius;
         }
@@ -25,7 +25,7 @@ namespace SimpleRaytracer
         public bool TryGetRayHit(Ray ray, out Hit? hit)
         {
             var offset = Position - ray.Origin;
-            var projection = Vector3.Dot(offset, ray.Direction);
+            var projection = Vec3.Dot(offset, ray.Direction);
             var distanceToCenter = offset.Length();
             var distanceToIntersection = (float)XMath.Sqrt(distanceToCenter * distanceToCenter - projection * projection);
 
@@ -48,7 +48,7 @@ namespace SimpleRaytracer
             // TODO: Subtract epsilon
             var dist = XMath.Min(hitDistance1, hitDistance2) - 0.001f;
             var hitPos = ray.Origin + ray.Direction * dist;
-            var normal = Vector3.Normalize(hitPos - Position);
+            var normal = Vec3.Normalize(hitPos - Position);
 
             hit = new Hit(Material, hitPos, normal, dist);
 

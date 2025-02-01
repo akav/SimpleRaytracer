@@ -26,58 +26,58 @@ namespace SimpleRaytracer.Gui
 
         private void Window_Load(object sender, EventArgs e)
         {
-            var camera = new Camera(new Vector3(0, 2.3f, -2), 0.1f, 60, outputResolution.Width / (float)outputResolution.Height);
+            var camera = new Camera(new Vec3(0, 2.3f, -2), 0.1f, 60, outputResolution.Width / (float)outputResolution.Height);
 
             var sun = new GpuSphere(
-                new Vector3(-5, 20, 0),
-                new Material(new Vector3(0, 0, 0), new Vector3(1, 1, 0.9f) * 8),
+                new Vec3(-5, 20, 0),
+                new Material(new Vec3(0, 0, 0), new Vec3(1, 1, 0.9f) * 8),
                 4f
             );
 
             // Spheres
             var sphere1 = new GpuSphere(
-                new Vector3(-3, 0, 0),
-                new Material(new Vector3(0.95f, 0, 0), 0),
+                new Vec3(-3, 0, 0),
+                new Material(new Vec3(0.95f, 0, 0), 0),
                 0.75f
             );
 
             var sphere2 = new GpuSphere(
-                new Vector3(-1, 0, 0),
-                new Material(new Vector3(0, 0.95f, 0), 0.1f),
+                new Vec3(-1, 0, 0),
+                new Material(new Vec3(0, 0.95f, 0), 0.1f),
                  0.75f
             );
 
             var sphere3 = new GpuSphere(
-                new Vector3(1, 0, 0),
-                new Material(new Vector3(0, 0, 0.95f), 0.7f),
+                new Vec3(1, 0, 0),
+                new Material(new Vec3(0, 0, 0.95f), 0.7f),
                  0.75f
             );
 
             var sphere4 = new GpuSphere(
-                new Vector3(3, 0, 0),
-                new Material(new Vector3(0.8f, 0.8f, 0.8f), 1f),
+                new Vec3(3, 0, 0),
+                new Material(new Vec3(0.8f, 0.8f, 0.8f), 1f),
                  0.75f
             );
 
             var triangles = new List<Triangle>();
 
             var ground = MeshGenerator.LoadPlaneData(
-                new Vector3(0, 0, 0),
-                new Material(new Vector3(0.4f, 0.8f, 0.1f), 0.001f),
+                new Vec3(0, 0, 0),
+                new Material(new Vec3(0.4f, 0.8f, 0.1f), 0.001f),
                 10,
                 ref triangles
             );
 
             var monkey = new Mesh(
-                new Vector3(0, 1.5f, 0),
-                new Material(new Vector3(0.9f, 0.9f, 0.9f), 0.05f)
+                new Vec3(0, 1.5f, 0),
+                new Material(new Vec3(0.9f, 0.9f, 0.9f), 0.05f)
             );
 
             monkey.LoadFromObj("models/suzanne/suzanne.obj", ref triangles);
 
             scene = new Scene()
             {
-                Ambient = new Vector3(0.1f, 0.2f, 0.3f) * 0.5f
+                Ambient = new Vec3(0.1f, 0.2f, 0.3f) * 0.5f
             };
             scene.Camera = camera;
             scene.Meshes = new Mesh[] { ground, monkey };
@@ -172,19 +172,19 @@ namespace SimpleRaytracer.Gui
 
                         t += deltaTime / 1000f;
 
-                        raytracer.Render(Vector3.Normalize(new Vector3((float)Math.Sin(t), 1, (float)Math.Cos(t))), false, 1, 10);
+                        raytracer.Render(Vec3.Normalize(new Vec3((float)Math.Sin(t), 1, (float)Math.Cos(t))), false, 1, 10);
 
                         raytracer.WaitForResult(ref bmp);
                         sw.Stop();
 
-                        Debug.WriteLine($"Wait for result: {sw.Elapsed.TotalMilliseconds} ms");
+                        //Debug.WriteLine($"Wait for result: {sw.Elapsed.TotalMilliseconds} ms");
 
-                        Debug.WriteLine("Done");
+                        //Debug.WriteLine("Done");
 
                         //Directory.CreateDirectory("renders");
                         //bmp.Save($"renders/render_{DateTime.Now.Ticks}.png");
 
-                        Debug.WriteLine("Saved");
+                        //Debug.WriteLine("Saved");
 
                         Invoke(() =>
                         {
@@ -200,6 +200,11 @@ namespace SimpleRaytracer.Gui
                     raytracer.Dispose();
                 }
             });
+        }
+
+        private void pictureBox_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

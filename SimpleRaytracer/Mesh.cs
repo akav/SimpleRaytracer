@@ -5,14 +5,14 @@ namespace SimpleRaytracer
 {
     public struct Mesh
     {
-        public Vector3 Position;
+        public Vec3 Position;
         public Material Material;
         public Aabb Aabb = default;
         public GpuBool SkipBoundingBoxTest = false;
         public int triangleCount = default;
         public int arrayOffset = default;
 
-        public Mesh(Vector3 position, Material material)
+        public Mesh(Vec3 position, Material material)
         {
             Position = position;
             Material = material;
@@ -40,18 +40,18 @@ namespace SimpleRaytracer
                 {
                     if (face.Count == 3)
                     {
-                        var vectors = new Vector3[3];
-                        var normals = new Vector3[3];
+                        var vectors = new Vec3[3];
+                        var normals = new Vec3[3];
 
                         for (int i = 0; i < 3; i++)
                         {
                             var f = face[i];
 
                             var vertexPos = result.Vertices[f.VertexIndex - 1];
-                            vectors[i] = new Vector3(vertexPos.X, vertexPos.Y, vertexPos.Z) + Position;
+                            vectors[i] = new Vec3(vertexPos.X, vertexPos.Y, vertexPos.Z) + Position;
 
                             var normal = result.Vertices[f.VertexIndex - 1];
-                            normals[i] = new Vector3(normal.X, normal.Y, normal.Z);
+                            normals[i] = new Vec3(normal.X, normal.Y, normal.Z);
 
                             if (vectors[i].X < minX)
                             {
@@ -104,8 +104,8 @@ namespace SimpleRaytracer
 
                 var aabb = new Aabb()
                 {
-                    Min = new Vector3(minX, minY, minZ),
-                    Max = new Vector3(maxX, maxY, maxZ)
+                    Min = new Vec3(minX, minY, minZ),
+                    Max = new Vec3(maxX, maxY, maxZ)
                 };
 
                 Aabb = aabb;

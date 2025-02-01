@@ -18,7 +18,7 @@ namespace SimpleRaytracer
             this.b = b;
         }
 
-        public static ColorDataBgr GetGammaCorrected(Vector3 pixelColor, float scale)
+        public static ColorDataBgr GetGammaCorrected(Vec3 pixelColor, float scale)
         {
             return new ColorDataBgr(
                 (byte)XMath.Clamp(XMath.Sqrt(pixelColor.X * scale) * 255, 0, 255),
@@ -27,12 +27,12 @@ namespace SimpleRaytracer
             );
         }
 
-        public Vector3 ToVector3()
+        public Vec3 ToVec3()
         {
             return new(r, g, b);
         }
 
-        public static ColorDataBgr FromVector3(Vector3 vector)
+        public static ColorDataBgr FromVec3(Vec3 vector)
         {
             return new ColorDataBgr(
                 (byte)XMath.Clamp(vector.X, 0, 255),

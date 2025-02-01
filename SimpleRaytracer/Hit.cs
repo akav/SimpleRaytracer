@@ -5,11 +5,11 @@ namespace SimpleRaytracer
     public struct Hit
     {
         public Material material;
-        public Vector3 position;
-        public Vector3 normal;
+        public Vec3 position;
+        public Vec3 normal;
         public float distance;
 
-        public Hit(Material material, Vector3 position, Vector3 normal, float distance)
+        public Hit(Material material, Vec3 position, Vec3 normal, float distance)
         {
             this.material = material;
             this.position = position;

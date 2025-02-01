@@ -41,6 +41,7 @@
             pictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
             pictureBox.TabIndex = 0;
             pictureBox.TabStop = false;
+            pictureBox.Click += pictureBox_Click;
             // 
             // Window
             // 
